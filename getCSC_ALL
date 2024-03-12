@@ -1,0 +1,145 @@
+import pandas as pd
+import numpy as np
+
+### generate dictionaries of codon values ###
+# only values for Human are listed below; likewise for mouse, chicken, and zebrafish
+
+#original CSC
+df = pd.read_csv('./Josh_codon_project/codon_avgs.csv')
+codon_avgs_dict  = dict(df.values)
+codon_avgs_dict
+
+#Codon Usage Frequency
+df = pd.read_csv('./Josh_codon_project/CoCoPUTs.csv')
+CoCoPUTs_dict  = dict(df.values)
+CoCoPUTs_dict
+
+#Forrest CSC
+df = pd.read_csv('./Josh_codon_project/Forrest/Forrest_CSC_values.csv')
+Forrest_dict  = dict(df.values)
+Forrest_dict
+
+#Narula CSC
+df = pd.read_csv('./Josh_codon_project/Narula/Narula_CSC_values.csv')
+Narula_dict  = dict(df.values)
+Narula_dict
+
+#RSCU
+df = pd.read_csv('./Josh_codon_project/RSCU_values.csv')
+RSCU_dict  = dict(df.values)
+RSCU_dict
+
+#RSCU-Max
+df = pd.read_csv('./Josh_codon_project/RSCU_Max_values.csv')
+RSCU_Max_dict  = dict(df.values)
+RSCU_Max_dict
+
+### define functions ###
+
+def getCSC(Seq, start_position):
+    # separate sequence by codon, and put into list
+    CodonList = []
+    for x in range(start_position, len(Seq), 3):
+        if len(Seq[x:x+3]) == 3:          # if it's a full codon
+            CodonList.append(Seq[x:x+3].upper())
+    
+    # for each codon, add to sumScore its CSC score and then find the avg across the whole sequence
+    sumScore = 0
+    numstops = 0
+    for codon in CodonList:
+        if codon in codon_avgs_dict:
+            score = codon_avgs_dict[codon]
+            sumScore += score
+        else: #is a stop codon (still counted as codon in CodonList, but doesn't have CSC score, so don't include in avg)
+            numstops += 1
+    avgScore = sumScore / (len(CodonList) - numstops)
+    return avgScore
+
+def getCoCoPUTs(Seq, start_position):
+    CodonList = []
+    for x in range(start_position, len(Seq), 3):
+        if len(Seq[x:x+3]) == 3:          
+            CodonList.append(Seq[x:x+3].upper())
+    
+    sumScore = 0
+    numstops = 0
+    for codon in CodonList:
+        if codon in CoCoPUTs_dict:
+            score = CoCoPUTs_dict[codon]
+            sumScore += score
+        else: 
+            numstops += 1
+    avgScore = sumScore / (len(CodonList) - numstops)
+    return avgScore
+
+def getForrestCSC(Seq, start_position):
+    CodonList = []
+    for x in range(start_position, len(Seq), 3):
+        if len(Seq[x:x+3]) == 3:          
+            CodonList.append(Seq[x:x+3].upper())
+    
+    sumScore = 0
+    numstops = 0
+    for codon in CodonList:
+        if codon in Forrest_dict:
+            score = Forrest_dict[codon]
+            sumScore += score
+        else: 
+            numstops += 1
+    avgScore = sumScore / (len(CodonList) - numstops)
+    return avgScore
+
+def getNarulaCSC(Seq, start_position):
+    CodonList = []
+    for x in range(start_position, len(Seq), 3):
+        if len(Seq[x:x+3]) == 3:          
+            CodonList.append(Seq[x:x+3].upper())
+    
+    sumScore = 0
+    numstops = 0
+    for codon in CodonList:
+        if codon in Narula_dict:
+            score = Narula_dict[codon]
+            sumScore += score
+        else: 
+            numstops += 1
+    avgScore = sumScore / (len(CodonList) - numstops)
+    return avgScore
+
+def getRSCU_GeoMean(Seq, start_position):
+    CodonList = []
+    for x in range(start_position, len(Seq), 3):
+        if len(Seq[x:x+3]) == 3:          
+            CodonList.append(Seq[x:x+3].upper())
+
+    prodScore = []
+    numstops = 0
+    for codon in CodonList:
+        if codon in RSCU_dict:
+            score = RSCU_dict[codon]
+            prodScore.append(score)
+        else: 
+            numstops += 1
+    product = np.prod(prodScore)
+    exponent = 1/(len(CodonList) - numstops)
+    Score = product ** exponent
+    return Score
+
+def getRSCU_Max_GeoMean(Seq, start_position):
+    CodonList = []
+    for x in range(start_position, len(Seq), 3):
+        if len(Seq[x:x+3]) == 3:          
+            CodonList.append(Seq[x:x+3].upper())
+
+    prodScore = []
+    numstops = 0
+    for codon in CodonList:
+        if codon in RSCU_Max_dict:
+            score = RSCU_Max_dict[codon]
+            prodScore.append(score)
+        else:
+            numstops += 1
+    product = np.prod(prodScore)
+    exponent = 1/(len(CodonList) - numstops)
+    Score = product ** exponent
+    return Score
